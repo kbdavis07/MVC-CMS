@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNet.Identity
+@if (Request.IsAuthenticated)
+{
+    <!-- Load Aloha Editor css and js -->
+    <link rel="stylesheet" href="~/editor/aloha/css/aloha.css" type="text/css" />
+
+    <script src="~/editor/aloha/demo/boilerplate/js/aloha-config.js"></script>
+    <script src="~/editor/aloha/lib/require.js"></script>
+    <script src="~/editor/aloha/lib/aloha.js"
+            data-aloha-plugins="common/ui,
+	                            common/abbr,
+                                common/align,
+                                common/autoparagraph,
+                                common/block,
+                                common/characterpicker,
+                                common/commands,
+                                common/horizontalruler,
+                                common/image,
+                                common/link,
+                                common/list,
+                                common/paste,
+                                common/table,
+                                common/undo,
+                                extra/cite,
+                                extra/draganddropfiles,
+                                extra/numerated-headers,
+                                extra/toc">
+
+    </script>
+
+    <script src="~/editor/aloha/lib/aloha-save-to-backend.js"></script>
+}
+else
+{
+   
+}

@@ -1,0 +1,28 @@
+﻿@model CMS.DAL.Models.PageItem
+
+@{
+    Layout = "~/Views/Shared/_Layout-Theme.cshtml";
+}
+
+@{
+    ViewBag.Title = Model.MetaTitle;
+}
+
+
+<div class="blog-post">
+
+    <h2 class="blog-post-title">@Model.Title</h2>
+
+
+    <p class="blog-post-meta">@Model.DateCreated by <a href="#">@Model.Author</a></p>
+
+   
+        <div id="editable" data-id="@Model.Id" data-request-url="@Url.Action("EditContent", "Page")">
+            @Html.Raw(Model.Content)
+        </div>
+  
+
+</div>
+
+
+<!-- /.blog-post -->

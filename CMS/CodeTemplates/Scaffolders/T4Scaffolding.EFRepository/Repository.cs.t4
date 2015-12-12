@@ -1,0 +1,73 @@
+﻿<#@ template language="C#" HostSpecific="True"  inherits="DynamicTransform" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="EnvDTE" #>
+<#@ Output Extension="cs" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+<# if ((Model.ModelTypeNamespace != Model.RepositoryNamespace) && !string.IsNullOrEmpty(Model.ModelTypeNamespace)) { #>
+using <#= Model.ModelTypeNamespace #>;
+<# } #>
+
+namespace <#= Model.RepositoryNamespace #>
+{ 
+<# 
+	var modelName = ((CodeType)Model.ModelType).Name; 
+	var modelNamePlural = Model.ModelTypePluralized; 
+	var primaryKeyProperty = ((CodeType)Model.ModelType).VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+#>
+    /// <summary>
+    /// A dummy in-memory repository for <#= modelName #> entities. Its data will be reset each time you restart the application.
+    /// </summary>
+    public class <#= modelName #>Repository : I<#= modelName #>Repository
+    {
+		private readonly static Dictionary<<#= primaryKeyProperty.Type.AsString #>, <#= modelName #>> InMemoryCollection = new Dictionary<<#= primaryKeyProperty.Type.AsString #>, <#= modelName #>>();
+
+        public IQueryable<<#= modelName #>> All
+        {
+			get { return InMemoryCollection.Values.AsQueryable(); }
+        }
+
+        public IQueryable<<#= modelName #>> AllIncluding(params Expression<Func<<#= modelName #>, object>>[] includeProperties)
+        {
+            // It's all in-memory anyway, so there's nothing extra to include
+            return All;
+        }
+
+        public <#= modelName #> Find(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            return InMemoryCollection[id];
+        }
+
+        public void InsertOrUpdate(<#= modelName #> <#= modelName.ToLower() #>)
+        {
+<# /* Note: Assumes the ID property is a numeric type. Would need to add special support for GUID keys here if you wanted to use them. */ #>
+			// Assign an ID if we're inserting a new item
+            if (<#= modelName.ToLower() #>.<#= Model.PrimaryKey #> == 0)
+                <#= modelName.ToLower() #>.<#= Model.PrimaryKey #> = InMemoryCollection.Any() ? InMemoryCollection.Max(x => x.Key) + 1 : 1;
+
+            InMemoryCollection[<#= modelName.ToLower() #>.<#= Model.PrimaryKey #>] = <#= modelName.ToLower() #>;
+        }
+
+        public void Delete(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            InMemoryCollection.Remove(id);
+        }
+
+        public void Save()
+        {
+            // Nothing to do
+        }
+    }
+
+	public interface I<#= modelName #>Repository
+    {
+		IQueryable<<#= modelName #>> All { get; }
+		IQueryable<<#= modelName #>> AllIncluding(params Expression<Func<<#= modelName #>, object>>[] includeProperties);
+		<#= modelName #> Find(<#= primaryKeyProperty.Type.AsString #> id);
+		void InsertOrUpdate(<#= modelName #> <#= modelName.ToLower() #>);
+        void Delete(<#= primaryKeyProperty.Type.AsString #> id);
+        void Save();
+    }
+}
